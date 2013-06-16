@@ -1,10 +1,10 @@
 <?php
-require_once('lib/bench.php');
+require_once('lib/Bench/Bench.php');
 class Test_Bench extends PHPUnit_Framework_TestCase
 {
 	public function target_files()
 	{
-		$example_dir = dirname(__FILE__) . '/../example/functions';
+		$example_dir = dirname(__FILE__) . '/../../example/functions';
 		return array(
 			array(
 				$example_dir . '/array_map.php',
