@@ -5,6 +5,7 @@ class Bench
 
 	protected $target_files = array();
 	protected $results = null;
+	protected $repeat = 1;
 
 	/**
 	 * ベンチ対象のターゲットファイルを配列に格納して初期化する
@@ -48,25 +49,63 @@ class Bench
 	}
 
 	/**
+	 * 実行回数を設定する
+	 * @param int $repeat_number
+	 * @return $this
+	 * @throws InvalidArgumentException
+	 */
+	public function set_repeat($repeat_number)
+	{
+		if(!is_numeric($repeat_number) || (int)$repeat_number <= 0){
+			throw new InvalidArgumentException();
+		}
+		$this->repeat = (int)$repeat_number;
+		return $this;
+	}
+
+	/**
 	 * ベンチマークを実行して結果をプロパティに保存する
 	 * @return $this
 	 */
 	public function run()
 	{
 		foreach ($this->target_files as $key => $target_file) {
-			$result = array('script' => $target_file);
 			try {
-				$start_time = microtime(true);
+				$results = array();
+				$min_micro_seconds = floatval(PHP_INT_MAX);
+				$max_micro_seconds = 0.0;
+				$total_micro_seconds = 0.0;
 				$function = function () use ($target_file) {
 					include($target_file);
 				};
-				$function();
-				$result['micro_seconds'] = microtime(true) - $start_time;
-				$result['milli_seconds'] = (int)round($result['micro_seconds'] * 1000);
-			} catch (Exception $error) {
+				for($i = 0; $i < $this->repeat; $i++){
+					$result = array();
+					$start_time = microtime(true);
+					$function();
+					$result['micro_seconds'] = microtime(true) - $start_time;
+					$result['milli_seconds'] = (int)round($result['micro_seconds'] * 1000);
+					$results[] = $result;
 
+					$min_micro_seconds = min($result['micro_seconds'], $min_micro_seconds);
+					$max_micro_seconds = max($result['micro_seconds'], $max_micro_seconds);
+					$total_micro_seconds += $result['micro_seconds'];
+				}
+				$average_micro_seconds = $total_micro_seconds / count($results);
+				$this->results[$key] = array(
+					'script' => $target_file,
+					'max_micro_seconds' => $max_micro_seconds,
+					'min_micro_seconds' => $min_micro_seconds,
+					'max_milli_seconds' => (int)round($max_micro_seconds * 1000),
+					'min_milli_seconds' => (int)round($min_micro_seconds * 1000),
+					'avg_micro_seconds' => $average_micro_seconds,
+					'avg_milli_seconds' => (int)round($average_micro_seconds * 1000),
+					'total_micro_seconds' => $total_micro_seconds,
+					'total_milli_seconds' => (int)round($total_micro_seconds * 1000),
+					'count' => count($results),
+					'results' => $results,
+				);
+			} catch (Exception $error) {
 			}
-			$this->results[$key] = $result;
 		}
 		return $this;
 	}
@@ -94,7 +133,11 @@ class Bench
 		foreach ($this->get_results() as $key => $result) {
 			$result_messages[] = array(
 				'#' . $key . ' : ' . $result['script'],
-				'    time: ' . $result['milli_seconds'] . ' milli sec (' . $result['micro_seconds'] . ' micro sec)',
+				'    (' . $result['count'] . ' times)',
+				'    avg time: ' . $result['avg_milli_seconds'] . ' milli sec (' . $result['avg_micro_seconds'] . ' micro sec)',
+				'    max time: ' . $result['max_milli_seconds'] . ' milli sec (' . $result['max_micro_seconds'] . ' micro sec)',
+				'    min time: ' . $result['min_milli_seconds'] . ' milli sec (' . $result['min_micro_seconds'] . ' micro sec)',
+				'    total time: ' . $result['total_milli_seconds'] . ' milli sec (' . $result['total_micro_seconds'] . ' micro sec)',
 			);
 		}
 		$max_width = max(array_map(function ($result_array) {

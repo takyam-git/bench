@@ -60,6 +60,20 @@ class Test_Bench extends PHPUnit_Framework_TestCase
 		$this->assertFalse($method->invoke($bench, __FUNCTION__));
 	}
 
+	public function test_set_repeat()
+	{
+		$bench = new Bench(__FILE__);
+		$repeat = new ReflectionProperty($bench, 'repeat');
+		$repeat->setAccessible(true);
+		$this->assertSame(1, $repeat->getValue($bench));
+		$this->assertInstanceOf('Bench', $bench->set_repeat(100));
+		$this->assertSame(100, $repeat->getValue($bench));
+
+		$this->setExpectedException('InvalidArgumentException');
+		$bench->set_repeat(-1);
+		$bench->set_repeat(0);
+	}
+
 	/**
 	 * @dataProvider target_files
 	 */
@@ -78,11 +92,33 @@ class Test_Bench extends PHPUnit_Framework_TestCase
 			$this->assertInternalType('array', $value);
 			$this->assertArrayHasKey('script', $value);
 			$this->assertFileExists($value['script']);
-			$this->assertArrayHasKey('milli_seconds', $value);
-			$this->assertInternalType('int', $value['milli_seconds']);
-			$this->assertArrayHasKey('micro_seconds', $value);
-			$this->assertInternalType('float', $value['micro_seconds']);
-
+			$this->assertArrayHasKey('avg_milli_seconds', $value);
+			$this->assertInternalType('int', $value['avg_milli_seconds']);
+			$this->assertArrayHasKey('avg_micro_seconds', $value);
+			$this->assertInternalType('float', $value['avg_micro_seconds']);
+			$this->assertArrayHasKey('max_milli_seconds', $value);
+			$this->assertInternalType('int', $value['max_milli_seconds']);
+			$this->assertArrayHasKey('max_micro_seconds', $value);
+			$this->assertInternalType('float', $value['max_micro_seconds']);
+			$this->assertArrayHasKey('min_milli_seconds', $value);
+			$this->assertInternalType('int', $value['min_milli_seconds']);
+			$this->assertArrayHasKey('min_micro_seconds', $value);
+			$this->assertInternalType('float', $value['min_micro_seconds']);
+			$this->assertArrayHasKey('total_milli_seconds', $value);
+			$this->assertInternalType('int', $value['total_milli_seconds']);
+			$this->assertArrayHasKey('total_micro_seconds', $value);
+			$this->assertInternalType('float', $value['total_micro_seconds']);
+			$this->assertArrayHasKey('count', $value);
+			$this->assertInternalType('int', $value['count']);
+			$this->assertArrayHasKey('results', $value);
+			$this->assertInternalType('array', $value['results']);
+			foreach ($value['results'] as $row) {
+				$this->assertInternalType('array', $row);
+				$this->assertArrayHasKey('micro_seconds', $row);
+				$this->assertInternalType('float', $row['micro_seconds']);
+				$this->assertArrayHasKey('milli_seconds', $row);
+				$this->assertInternalType('int', $row['milli_seconds']);
+			}
 		}
 	}
 
@@ -99,10 +135,33 @@ class Test_Bench extends PHPUnit_Framework_TestCase
 			$this->assertInternalType('array', $value);
 			$this->assertArrayHasKey('script', $value);
 			$this->assertFileExists($value['script']);
-			$this->assertArrayHasKey('milli_seconds', $value);
-			$this->assertInternalType('int', $value['milli_seconds']);
-			$this->assertArrayHasKey('micro_seconds', $value);
-			$this->assertInternalType('float', $value['micro_seconds']);
+			$this->assertArrayHasKey('avg_milli_seconds', $value);
+			$this->assertInternalType('int', $value['avg_milli_seconds']);
+			$this->assertArrayHasKey('avg_micro_seconds', $value);
+			$this->assertInternalType('float', $value['avg_micro_seconds']);
+			$this->assertArrayHasKey('max_milli_seconds', $value);
+			$this->assertInternalType('int', $value['max_milli_seconds']);
+			$this->assertArrayHasKey('max_micro_seconds', $value);
+			$this->assertInternalType('float', $value['max_micro_seconds']);
+			$this->assertArrayHasKey('min_milli_seconds', $value);
+			$this->assertInternalType('int', $value['min_milli_seconds']);
+			$this->assertArrayHasKey('min_micro_seconds', $value);
+			$this->assertInternalType('float', $value['min_micro_seconds']);
+			$this->assertArrayHasKey('total_milli_seconds', $value);
+			$this->assertInternalType('int', $value['total_milli_seconds']);
+			$this->assertArrayHasKey('total_micro_seconds', $value);
+			$this->assertInternalType('float', $value['total_micro_seconds']);
+			$this->assertArrayHasKey('count', $value);
+			$this->assertInternalType('int', $value['count']);
+			$this->assertArrayHasKey('results', $value);
+			$this->assertInternalType('array', $value['results']);
+			foreach ($value['results'] as $row) {
+				$this->assertInternalType('array', $row);
+				$this->assertArrayHasKey('micro_seconds', $row);
+				$this->assertInternalType('float', $row['micro_seconds']);
+				$this->assertArrayHasKey('milli_seconds', $row);
+				$this->assertInternalType('int', $row['milli_seconds']);
+			}
 		}
 	}
 
