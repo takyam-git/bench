@@ -8,7 +8,7 @@ composer.json に以下を追加
 ```json
 {
 	"require-dev": {
-		"takyam/bench": "*"
+		"takyam/bench": "dev-master"
 	}
 }
 ```
